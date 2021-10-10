@@ -22,28 +22,24 @@ app.get('/getImgTable', async (req, res) => {
     if (ranksResult) {
       ranks = JSON.parse(ranksResult)
       let isPush = false
+      let isUpdate = false
       let nameExist = false
-      console.log(ranks)
 
       for (let rank = 0; rank < ranks.length; rank++) {
-        if (newScore > ranks[rank].score && newName !== ranks[rank].name) {
+        if (newScore > Number(ranks[rank].score) && !isUpdate) {
           ranks.splice(rank, 0, { name: newName, score: newScore })
           isPush = true
-          break
-        } else if (newScore > ranks[rank].score && newName === ranks[rank].name) {
-          ranks[rank].score = newScore
-          isPush = true
-          break
+          isUpdate = true
         } else if (newName === ranks[rank].name) {
+          if (isUpdate) ranks.splice(rank, 1)
           nameExist = true
         }
       }
-
+      
       if (!isPush && !nameExist) {
         ranks.push({ name: newName, score: newScore })
       }
     } else {
-      console.log(JSON.stringify([{ name: newName, score: newScore }]))
       ranks = [{ name: newName, score: newScore }]
     }
     
