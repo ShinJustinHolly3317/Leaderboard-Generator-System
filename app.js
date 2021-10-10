@@ -22,24 +22,31 @@ app.get('/getImgTable', async (req, res) => {
     if (ranksResult) {
       ranks = JSON.parse(ranksResult)
       let isPush = false
+      let nameExist = false
       console.log(ranks)
+
       for (let rank = 0; rank < ranks.length; rank++) {
-        if (newScore > ranks[rank].score) {
+        if (newScore > ranks[rank].score && newName !== ranks[rank].name) {
           ranks.splice(rank, 0, { name: newName, score: newScore })
-          console.log('splice ok')
-          console.log(ranks)
           isPush = true
           break
+        } else if (newScore > ranks[rank].score && newName === ranks[rank].name) {
+          ranks[rank].score = newScore
+          isPush = true
+          break
+        } else if (newName === ranks[rank].name) {
+          nameExist = true
         }
       }
-      if (!isPush) {
+
+      if (!isPush && !nameExist) {
         ranks.push({ name: newName, score: newScore })
-        console.log()
       }
     } else {
       console.log(JSON.stringify([{ name: newName, score: newScore }]))
       ranks = [{ name: newName, score: newScore }]
     }
+    
     await Cache.set('godrank', JSON.stringify(ranks))
     res.send(renderTable(ranks))
   } else {
